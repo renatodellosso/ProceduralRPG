@@ -1,6 +1,6 @@
 ﻿using MenuEngine.src;
 using MenuEngine.src.elements;
-using ProceduralRPG.src.worldgeneration;
+using ProceduralRPG.src.world.generation;
 
 namespace ProceduralRPG.src.elements.menus
 {

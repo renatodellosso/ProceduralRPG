@@ -1,7 +1,8 @@
 ﻿using MenuEngine.src;
 using MenuEngine.src.elements;
-using ProceduralRPG.src.worldgeneration;
+using ProceduralRPG.src.world.generation;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ProceduralRPG.src.elements.menus
 {
@@ -23,7 +24,8 @@ namespace ProceduralRPG.src.elements.menus
             _ = new ButtonElement(this, new(0.2f, 0.1f), new(0.075f, 0.05f), labelText: "Cancel", onClick: Cancel);
             logElement = new TextElement(this, new(0.1f, 0.2f), new(0.8f, 0.7f), "", justify: TextElement.Justify.Left, align: TextElement.Align.Bottom);
 
-            Log("Generating world...");
+            WorldGenerator.Start(this, settings);
+
         }
 
         internal void Cancel()
@@ -34,6 +36,8 @@ namespace ProceduralRPG.src.elements.menus
 
         internal void Log(string message)
         {
+            Debug.WriteLine(message);
+
             log.Add(message);
 
             if (log.Count > LOG_LENGTH)
