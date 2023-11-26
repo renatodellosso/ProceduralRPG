@@ -23,6 +23,9 @@
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="BetterTasks">
+      <HintPath>..\BetterTasks\bin\Debug\net7.0\BetterTasks.dll</HintPath>
+    </Reference>
     <Reference Include="MenuEngine">
       <HintPath>..\MenuEngine\bin\Debug\net6.0\MenuEngine.dll</HintPath>
     </Reference>
