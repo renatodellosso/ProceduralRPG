@@ -9,7 +9,7 @@ namespace ProceduralRPG.src.elements.menus
     internal class WorldGenerationMenu : Element
     {
 
-        private TextElement titleElement;
+        internal TextElement titleElement;
 
         private List<string> log;
         private const int LOG_LENGTH = 10;

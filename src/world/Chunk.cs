@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using System.Linq;
 
 namespace ProceduralRPG.src.world
@@ -16,6 +17,19 @@ namespace ProceduralRPG.src.world
         /// In meters
         /// </summary>
         internal int elevation;
+
+        internal int Temperature
+        {
+            get
+            {
+                int temp = World.Settings.baseTemperature;
+
+                temp -= (int)(0.035f * Math.Abs(this.elevation - World.Settings.defaultElevation));
+                temp -= (int)(120 * Math.Abs(Pos.Y - World.Settings.height / 2) / (World.Settings.height / 2));
+
+                return temp;
+            }
+        }
 
         internal Chunk(World world, Vector2 pos)
         {

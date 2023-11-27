@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace ProceduralRPG.src.world.generation
@@ -190,51 +189,10 @@ namespace ProceduralRPG.src.world.generation
                     Chunk chunk = world.Chunks[x, y];
                     int elevationChange = (int)((force.Y + force.X) * world.Settings.tectonicsForceMultiplier * years);
                     chunk.elevation += elevationChange;
-
-                    Debug.Write(chunk.elevation + " ");
                 }
-                Debug.WriteLine("");
             }
 
             WorldGenerator.instance.menu.Log("Applied forces.");
-        }
-
-        private static void LogMap(World world)
-        {
-            WorldGenerator.instance.menu.Log("Creating map...");
-
-            string map = "";
-            for (int y = 0; y < world.Settings.height; y++)
-            {
-                for (int x = 0; x < world.Settings.width; x++)
-                {
-                    Chunk chunk = world.Chunks[x, y];
-                    char c;
-
-                    string color;
-                    string[] colors = new string[]
-                    {
-                        "White", "Blue", "Green", "Yellow", "Red", "Purple", "Orange", "Brown", "Magenta",
-                        "Aqua", "Lime", "Olive", "Maroon", "Navy", "Teal", "Silver", "Gray", "Fuchsia"
-                    };
-                    if (chunk.plate != null)
-                        color = colors[chunk.plate!.Id % colors.Length];
-                    else
-                    {
-                        map += " ";
-                        continue;
-                    }
-
-                    if (chunk.plate!.Id < 10)
-                        c = (char)(chunk.plate.Id + 48);
-                    else
-                        c = (char)(chunk.plate.Id + 55);
-                    map += $"<color={color}>{c}</>";
-                }
-                map += "\n";
-            }
-
-            WorldGenerator.instance.menu.Log(map);
         }
     }
 }
