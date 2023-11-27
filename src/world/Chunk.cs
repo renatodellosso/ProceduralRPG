@@ -24,7 +24,7 @@ namespace ProceduralRPG.src.world
             {
                 int temp = World.Settings.baseTemperature;
 
-                temp -= (int)(0.035f * Math.Abs(this.elevation - World.Settings.defaultElevation));
+                temp -= (int)(0.015f * Math.Abs(elevation - World.Settings.defaultElevation));
                 temp -= (int)(120 * Math.Abs(Pos.Y - World.Settings.height / 2) / (World.Settings.height / 2));
 
                 return temp;

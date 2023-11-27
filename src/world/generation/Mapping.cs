@@ -37,7 +37,7 @@ namespace ProceduralRPG.src.world.generation
             map.Texture = texture;
         }
 
-        internal static void DisplayElevationmap(World world, TextureRendererElement map)
+        internal static void DisplayElevationMap(World world, TextureRendererElement map)
         {
             WorldGenerator.instance.menu.Log("Creating elevation map..."); Texture2D texture = new(Engine.Instance.GraphicsDevice,
                 world.Settings.width, world.Settings.height);
@@ -58,6 +58,28 @@ namespace ProceduralRPG.src.world.generation
                         color = Color.Lerp(Color.YellowGreen, Color.DarkGreen, (elevation - world.Settings.defaultElevation) / 2500f);
                     else
                         color = Color.Lerp(Color.Gray, Color.White, (elevation - 12500) / 2500f); ;
+
+                    colors[x + y * world.Settings.width] = color;
+                }
+            }
+
+            texture.SetData(colors);
+            map.Texture = texture;
+        }
+
+        internal static void DisplayRawElevationMap(World world, TextureRendererElement map)
+        {
+            WorldGenerator.instance.menu.Log("Creating raw elevation map..."); Texture2D texture = new(Engine.Instance.GraphicsDevice,
+                world.Settings.width, world.Settings.height);
+
+            Color[] colors = new Color[world.Settings.width * world.Settings.height];
+            for (int y = 0; y < world.Settings.height; y++)
+            {
+                for (int x = 0; x < world.Settings.width; x++)
+                {
+                    Chunk chunk = world.Chunks[x, y];
+
+                    Color color = Color.Lerp(Color.Black, Color.White, chunk.elevation / 15000f);
 
                     colors[x + y * world.Settings.width] = color;
                 }

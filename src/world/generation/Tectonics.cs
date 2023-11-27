@@ -116,6 +116,7 @@ namespace ProceduralRPG.src.world.generation
             // Calculate the forces for each chunk
             WorldGenerator.instance.menu.Log("Calculating forces...");
             Vector2[,] forces = new Vector2[world.Settings.width, world.Settings.height];
+            Vector2[] platewideForces = new Vector2[world.TectonicPlates.Count];
             for (int y = 0; y < world.Settings.height; y++)
             {
                 for (int x = 0; x < world.Settings.width; x++)
@@ -142,9 +143,32 @@ namespace ProceduralRPG.src.world.generation
                         force += additionalForce;
                     }
 
+                    // Apply the force to the whole plate
+                    platewideForces[chunk.plate!.Id] += force;
+
                     // Set the force in the array to the calculated force
                     // Vector2 is a struct, so we have to do this
                     forces[x, y] = force;
+                }
+            }
+
+            // Average the platewide forces
+            WorldGenerator.instance.menu.Log("Averaging platewide forces...");
+            for (int i = 0; i < platewideForces.Length; i++)
+            {
+                platewideForces[i] /= world.TectonicPlates[i].Chunks.Count;
+            }
+
+            // Add the platewide forces to the plates
+            WorldGenerator.instance.menu.Log("Applying platewide forces...");
+            for (int y = 0; y < world.Settings.height; y++)
+            {
+                for (int x = 0; x < world.Settings.width; x++)
+                {
+                    Chunk chunk = world.Chunks[x, y];
+                    if (chunk.plate == null) continue;
+
+                    forces[x, y] += platewideForces[chunk.plate!.Id] * world.Settings.tectonicsPlatewideForceMult;
                 }
             }
 
@@ -187,7 +211,7 @@ namespace ProceduralRPG.src.world.generation
                 {
                     Vector2 force = forces[x, y];
                     Chunk chunk = world.Chunks[x, y];
-                    int elevationChange = (int)((force.Y + force.X) * world.Settings.tectonicsForceMultiplier * years);
+                    int elevationChange = (int)((force.Y + force.X) * world.Settings.tectonicsForceMult * years);
                     chunk.elevation += elevationChange;
                 }
             }

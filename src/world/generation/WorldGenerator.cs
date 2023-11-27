@@ -1,5 +1,5 @@
 ﻿using BetterTasks;
-using MenuEngine.src.elements;
+using Microsoft.Xna.Framework;
 using ProceduralRPG.src.elements.menus;
 
 namespace ProceduralRPG.src.world.generation
@@ -49,10 +49,11 @@ namespace ProceduralRPG.src.world.generation
 
                 Tectonics.Generate(world);
 
-                TextureRendererElement map = new(menu, new(0.3f, 0.2f), new(0.4f, 0.4f * 1920 / 1080));
-                //Mapping.DisplayPlateMap(world, map);
-                Mapping.DisplayElevationmap(world, map);
-                //Mapping.DisplayTemperatureMap(world, map);
+                Vector2 mapPos = new(0.3f, 0f), mapSize = new(0.5f * 1080 / 1920, 0.5f);
+                Mapping.DisplayPlateMap(world, new(menu, mapPos, mapSize));
+                Mapping.DisplayElevationMap(world, new(menu, new(mapPos.X + mapSize.X, mapPos.Y), mapSize));
+                Mapping.DisplayRawElevationMap(world, new(menu, new(mapPos.X, mapPos.Y + mapSize.Y), mapSize));
+                Mapping.DisplayTemperatureMap(world, new(menu, new(mapPos.X + mapSize.X, mapPos.Y + mapSize.Y), mapSize));
 
                 menu.Log("<color=Green>World generation complete!</>");
                 menu.titleElement.SetText("<color=Green>World generation complete!</>");
