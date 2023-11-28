@@ -18,6 +18,10 @@
 
         internal int baseTemperature;
 
+        internal int rainfallSmoothing, baseRainfall;
+
+        internal int minInitialFactions, maxInitialFactions;
+
         internal WorldGenerationSettings()
         {
             width = 450;
@@ -33,6 +37,12 @@
             defaultElevation = 10000;
 
             baseTemperature = 110;
+
+            rainfallSmoothing = 50;
+            baseRainfall = 1250;
+
+            minInitialFactions = 1;
+            maxInitialFactions = 3;
         }
 
     }

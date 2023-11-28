@@ -18,6 +18,9 @@ namespace ProceduralRPG.src.world
         /// </summary>
         internal int elevation;
 
+        /// <summary>
+        /// In degrees Fahrenheit
+        /// </summary>
         internal int Temperature
         {
             get
@@ -28,6 +31,23 @@ namespace ProceduralRPG.src.world
                 temp -= (int)(120 * Math.Abs(Pos.Y - World.Settings.height / 2) / (World.Settings.height / 2));
 
                 return temp;
+            }
+        }
+
+        internal float baseRainfallMult;
+        /// <summary>
+        /// In ml
+        /// </summary>
+        internal int Rainfall
+        {
+            get
+            {
+                float rainfall = baseRainfallMult * World.Settings.baseRainfall;
+
+                rainfall *= 1.2f - (elevation - World.Settings.defaultElevation + 650) / 6500f * 0.7f;
+                rainfall *= 1.4f - Math.Abs(Temperature - 55) / 65f;
+
+                return Math.Max((int)rainfall, 0);
             }
         }
 

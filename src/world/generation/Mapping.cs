@@ -137,5 +137,40 @@ namespace ProceduralRPG.src.world.generation
             texture.SetData(colors);
             map.Texture = texture;
         }
+
+        internal static void DisplayRainfallMap(World world, TextureRendererElement map)
+        {
+            WorldGenerator.instance.menu.Log("Creating rainfall map...");
+
+            Texture2D texture = new(Engine.Instance.GraphicsDevice, world.Settings.width, world.Settings.height);
+
+            Color[] colors = new Color[world.Settings.width * world.Settings.height];
+            for (int y = 0; y < world.Settings.height; y++)
+            {
+                for (int x = 0; x < world.Settings.width; x++)
+                {
+                    Chunk chunk = world.Chunks[x, y];
+
+                    int rainfall = chunk.Rainfall;
+
+                    Color color;
+                    if (rainfall < 250)
+                        color = Color.Lerp(Color.Red, Color.Orange, rainfall / 250f);
+                    else if (rainfall < 500)
+                        color = Color.Lerp(Color.Orange, Color.Yellow, (rainfall - 250) / 250f);
+                    else if (rainfall < 750)
+                        color = Color.Lerp(Color.Yellow, Color.Green, (rainfall - 500) / 250f);
+                    else if (rainfall < 1000)
+                        color = Color.Lerp(Color.Green, Color.Blue, (rainfall - 750) / 250f);
+                    else
+                        color = Color.Lerp(Color.Blue, Color.White, (rainfall - 1000) / 500f);
+
+                    colors[x + y * world.Settings.width] = color;
+                }
+            }
+
+            texture.SetData(colors);
+            map.Texture = texture;
+        }
     }
 }

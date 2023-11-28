@@ -43,7 +43,7 @@ namespace ProceduralRPG.src.world
                 x %= Settings.width;
                 y %= Settings.height;
 
-                Chunks[x, y] = value;
+                Chunks[x, y] = value!;
             }
         }
 

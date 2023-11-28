@@ -50,7 +50,7 @@ namespace ProceduralRPG.src.world.generation
                     Chunk chunk;
                     do
                     {
-                        chunk = world.Chunks[Utils.RandInt(0, world.Settings.width), Utils.RandInt(0, world.Settings.height)];
+                        chunk = world.Chunks[Utils.RandInt(0, world.Settings.width - 1), Utils.RandInt(0, world.Settings.height - 1)];
                     }
                     while (chunk.plate != null);
 
@@ -84,7 +84,7 @@ namespace ProceduralRPG.src.world.generation
                 Chunk borderChunk;
                 do
                 {
-                    borderChunk = plate.Borders[Utils.RandInt(0, plate.Borders.Count)];
+                    borderChunk = plate.Borders[Utils.RandInt(0, plate.Borders.Count - 1)];
                 }
                 while (borderChunk.plate != null);
 
