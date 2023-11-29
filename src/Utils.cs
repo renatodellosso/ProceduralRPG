@@ -7,10 +7,12 @@ namespace ProceduralRPG.src
 
         private static Random Random = new(Seed: DateTime.Now.Second);
 
-        internal static float RandFloat(float max = 1, float min = 0)
+        internal static float RandFloat(float min = 0, float max = 1)
         {
             return Random.NextSingle() * (max - min) + min;
         }
+
+        internal static float RandFloat(float max) => RandFloat(0, max);
 
 
         internal static int RandInt(int max) => RandInt(0, max);

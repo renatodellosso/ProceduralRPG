@@ -10,8 +10,8 @@
         /// How many years the tectonic plates will move for before continuing with other steps
         /// </summary>
         internal int initialTectonicsLength;
-        internal int tectonicsSmoothing, tectonicsForceMult;
-        internal float tectonicsPlatewideForceMult;
+        internal int tectonicsSmoothing, tectonicsForceMult, chunkIntraplateForceSmoothing, intraplateForceElevationMult;
+        internal float tectonicsPlatewideForceMult, minIntraplateForceMult, maxIntraplateForceMult;
 
         internal int defaultElevation;
         // Note about elevation: I find 10,000 works well for sea level and 12500 for snow level
@@ -32,7 +32,11 @@
             initialTectonicsLength = 1000;
             tectonicsSmoothing = 50;
             tectonicsForceMult = 100;
+            chunkIntraplateForceSmoothing = 250;
+            intraplateForceElevationMult = 250;
             tectonicsPlatewideForceMult = 0.1f;
+            minIntraplateForceMult = 0.5f;
+            maxIntraplateForceMult = 3.0f;
 
             defaultElevation = 10000;
 

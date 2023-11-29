@@ -13,6 +13,11 @@ namespace ProceduralRPG.src.world
 
         internal Vector2 Movement { get; private set; }
 
+        /// <summary>
+        /// Multiplier on the random elevation change applied to each chunk
+        /// </summary>
+        internal float IntraplateForce { get; private set; }
+
         internal TectonicPlate(World world)
         {
             Id = world.TectonicPlates.Count;
@@ -21,7 +26,9 @@ namespace ProceduralRPG.src.world
             Chunks = new();
             Borders = new();
 
-            Movement = new((float)Utils.RandFloat(1, -1), (float)Utils.RandFloat(1, -1));
+            Movement = new((float)Utils.RandFloat(-1, 1), (float)Utils.RandFloat(-1, 1));
+
+            IntraplateForce = (float)Utils.RandFloat(world.Settings.minIntraplateForceMult, world.Settings.maxIntraplateForceMult);
         }
 
     }
