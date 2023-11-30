@@ -51,10 +51,12 @@ namespace ProceduralRPG.src.world.generation
                 Tectonics.Generate(world);
                 GenerateRainfall();
 
+                CalculateBiomes();
+
                 Vector2 mapPos = new(0.3f, 0f), mapSize = new(0.5f * 1080 / 1920, 0.5f);
                 Mapping.DisplayPlateMap(world, new(menu, mapPos, mapSize));
                 Mapping.DisplayElevationMap(world, new(menu, new(mapPos.X + mapSize.X, mapPos.Y), mapSize));
-                Mapping.DisplayRainfallMap(world, new(menu, new(mapPos.X, mapPos.Y + mapSize.Y), mapSize));
+                Mapping.DisplayBiomeMap(world, new(menu, new(mapPos.X, mapPos.Y + mapSize.Y), mapSize));
                 Mapping.DisplayTemperatureMap(world, new(menu, new(mapPos.X + mapSize.X, mapPos.Y + mapSize.Y), mapSize));
 
                 menu.Log("<color=Green>World generation complete!</>");
@@ -90,6 +92,20 @@ namespace ProceduralRPG.src.world.generation
                 for (int y = 0; y < settings.height; y++)
                 {
                     world.Chunks[x, y].baseRainfallMult = rainfall[x, y];
+                }
+            }
+        }
+
+        private void CalculateBiomes()
+        {
+            menu.Log("Calculating biomes...");
+
+            // Calculate biome for each chunk
+            for (int x = 0; x < settings.width; x++)
+            {
+                for (int y = 0; y < settings.height; y++)
+                {
+                    world.Chunks[x, y].CalculateBiome();
                 }
             }
         }

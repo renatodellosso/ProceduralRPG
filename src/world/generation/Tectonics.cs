@@ -1,5 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BetterTasks;
+using MenuEngine.src.elements;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace ProceduralRPG.src.world.generation
@@ -12,7 +15,7 @@ namespace ProceduralRPG.src.world.generation
             {
                 WorldGenerator.instance.menu.Log("Generating tectonic plates...");
 
-                int plateCount = Utils.RandInt(world.Settings.minPlateCount, world.Settings.maxPlateCount);
+                int plateCount = Utils.RandInt(world.Settings.tectonics.minPlateCount, world.Settings.tectonics.maxPlateCount);
 
                 List<TectonicPlate> plates = world.TectonicPlates;
 
@@ -24,9 +27,11 @@ namespace ProceduralRPG.src.world.generation
                 LinkedList<TectonicPlate> expandingPlates = new(plates);
                 ExpandPlates(world, expandingPlates);
 
-                ApplyForces(world, world.Settings.initialTectonicsLength);
+                ApplyForces(world, world.Settings.tectonics.initialDuration);
 
                 ApplyIntraplateForces(world);
+
+                CalculateAvgElevations(world);
 
                 WorldGenerator.instance.menu.Log("Tectonic plates generated.");
             }
@@ -41,6 +46,24 @@ namespace ProceduralRPG.src.world.generation
         {
             // For every plate, add a random adjacent chunk to it, until there are no more chunks to add
             WorldGenerator.instance.menu.Log("Expanding tectonic plates...");
+
+            Vector2 mapPos = new(0.3f, 0f), mapSize = new(0.5f * 1080 / 1920, 0.5f);
+            TextureRendererElement map = new(WorldGenerator.instance.menu, mapPos, mapSize);
+
+            BetterTask task = new((t) =>
+            {
+                try
+                {
+                    while (!t.IsCanceled)
+                        Mapping.DisplayPlateMap(world, map);
+                }
+                catch (System.Exception e)
+                {
+                    WorldGenerator.instance.menu.Log("Error displaying plate map: " + e.Message);
+                    WorldGenerator.instance.menu.Log(e.StackTrace ?? "StackTrace is null!");
+                }
+            });
+            task.Start();
 
             while (expandingPlates.Any())
             {
@@ -109,6 +132,21 @@ namespace ProceduralRPG.src.world.generation
                 expandingPlates.RemoveFirst();
                 if (plate.Borders.Any()) expandingPlates.AddLast(plate);
             }
+
+            task.Cancel();
+            map.Dispose();
+
+            // Check if every chunk is part of a plate
+            for (int y = 0; y < world.Settings.height; y++)
+            {
+                for (int x = 0; x < world.Settings.width; x++)
+                {
+                    if (world.Chunks[x, y].plate == null)
+                    {
+                        Debug.WriteLine($"Chunk at {x}, {y} is not part of a plate!");
+                    }
+                }
+            }
         }
 
         private static void ApplyForces(World world, int years)
@@ -145,8 +183,8 @@ namespace ProceduralRPG.src.world.generation
                         Vector2 relativePos = chunk.Pos - adjacent.Pos;
 
                         // Calculate forces of this collision
-                        Vector2 additionalForce = -1 * relativePos * (chunk.plate!.Movement - adjacent.plate!.Movement) / 2; // Divide by 2 so that the maximum force is 1
-                        force += additionalForce;
+                        // Divide by 2 so that the maximum force is 1
+                        force += world.Settings.tectonics.collisionForceMult * -1 * relativePos * (chunk.plate!.Movement - adjacent.plate!.Movement) / 2;
                     }
 
                     // Apply the force to the whole plate
@@ -166,48 +204,49 @@ namespace ProceduralRPG.src.world.generation
             }
 
             // Add the platewide forces to the plates
-            //WorldGenerator.instance.menu.Log("Applying platewide forces...");
-            //for (int y = 0; y < world.Settings.height; y++)
-            //{
-            //    for (int x = 0; x < world.Settings.width; x++)
-            //    {
-            //        Chunk chunk = world.Chunks[x, y];
-            //        if (chunk.plate == null) continue;
+            WorldGenerator.instance.menu.Log("Applying platewide forces...");
+            for (int y = 0; y < world.Settings.height; y++)
+            {
+                for (int x = 0; x < world.Settings.width; x++)
+                {
+                    Chunk chunk = world.Chunks[x, y];
+                    if (chunk.plate == null) continue;
 
-            //        forces[x, y] += platewideForces[chunk.plate!.Id] * world.Settings.tectonicsPlatewideForceMult;
-            //    }
-            //}
+                    Vector2 platewideForce = platewideForces[chunk.plate!.Id] * world.Settings.tectonics.platewideForceMult;
+                    forces[x, y] += platewideForce;
+                }
+            }
 
-            // Smooth out the forces
-            //WorldGenerator.instance.menu.Log("Smoothing forces...");
-            //for (int i = 0; i < world.Settings.tectonicsSmoothing; i++)
-            //{
-            //    // Average each force with its adjacent forces
+            //Smooth out the forces
+            WorldGenerator.instance.menu.Log("Smoothing forces...");
+            for (int i = 0; i < world.Settings.tectonics.collisionForceSmoothing; i++)
+            {
+                // Average each force with its adjacent forces
 
-            //    Vector2[,] newForces = new Vector2[world.Settings.width, world.Settings.height];
-            //    for (int y = 0; y < world.Settings.height; y++)
-            //    {
-            //        for (int x = 0; x < world.Settings.width; x++)
-            //        {
-            //            Chunk chunk = world.Chunks[x, y];
-            //            Vector2 force = forces[x, y];
+                Vector2[,] newForces = new Vector2[world.Settings.width, world.Settings.height];
+                for (int y = 0; y < world.Settings.height; y++)
+                {
+                    for (int x = 0; x < world.Settings.width; x++)
+                    {
+                        Chunk chunk = world.Chunks[x, y];
+                        Vector2 force = forces[x, y];
 
-            //            Chunk[] adjacentChunks = chunk.GetAdjacent();
+                        Chunk[] adjacentChunks = chunk.GetAdjacent();
 
-            //            // Add the forces of the adjacent chunks
-            //            foreach (Chunk adjacent in adjacentChunks)
-            //            {
-            //                force += forces[(int)adjacent.Pos.X, (int)adjacent.Pos.Y];
-            //            }
+                        // Add the forces of the adjacent chunks
+                        foreach (Chunk adjacent in adjacentChunks)
+                        {
+                            force += forces[(int)adjacent.Pos.X, (int)adjacent.Pos.Y];
+                        }
 
-            //            // Average the forces
-            //            force /= adjacentChunks.Length + 1;
+                        // Average the forces
+                        force /= adjacentChunks.Length + 1;
 
-            //            newForces[x, y] = force;
-            //        }
-            //    }
-            //    forces = newForces;
-            //}
+                        newForces[x, y] = force;
+                    }
+                }
+                forces = newForces;
+            }
 
             // Multiply the forces by the time, and then change elevation
             WorldGenerator.instance.menu.Log("Multiplying forces by time...");
@@ -217,7 +256,7 @@ namespace ProceduralRPG.src.world.generation
                 {
                     Vector2 force = forces[x, y];
                     Chunk chunk = world.Chunks[x, y];
-                    int elevationChange = (int)((force.Y + force.X) * world.Settings.tectonicsForceMult * years);
+                    int elevationChange = (int)((force.X + force.Y) * world.Settings.tectonics.forceMult * years);
                     chunk.elevation += elevationChange;
                 }
             }
@@ -242,7 +281,7 @@ namespace ProceduralRPG.src.world.generation
                 }
             }
 
-            Utils.Smooth(forces, world.Settings.chunkIntraplateForceSmoothing);
+            Utils.Smooth(forces, world.Settings.tectonics.chunkIntraplateForceSmoothing);
 
             // Scale the forces , and then change elevation
             for (int y = 0; y < world.Settings.height; y++)
@@ -251,9 +290,25 @@ namespace ProceduralRPG.src.world.generation
                 {
                     float force = forces[x, y];
                     Chunk chunk = world.Chunks[x, y];
-                    int elevationChange = (int)(force * world.Settings.intraplateForceElevationMult);
+                    int elevationChange = (int)(force * world.Settings.tectonics.intraplateForceElevationMult);
                     chunk.elevation += elevationChange;
                 }
+            }
+        }
+
+        private static void CalculateAvgElevations(World world)
+        {
+            WorldGenerator.instance.menu.Log("Calculating average elevations...");
+
+            // Calculate the average elevation for each plate
+            foreach (TectonicPlate plate in world.TectonicPlates)
+            {
+                plate.avgElevation = 0;
+                foreach (Chunk chunk in plate.Chunks)
+                {
+                    plate.avgElevation += chunk.elevation;
+                }
+                plate.avgElevation /= plate.Chunks.Count;
             }
         }
     }

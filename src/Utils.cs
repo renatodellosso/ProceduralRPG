@@ -22,6 +22,11 @@ namespace ProceduralRPG.src
             return Random.Next(min, max + 1);
         }
 
+        internal static void SeedRand(int seed)
+        {
+            Random = new(seed);
+        }
+
         /// <summary>
         /// Averages the values of the surrounding cells
         /// </summary>

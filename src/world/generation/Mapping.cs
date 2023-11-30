@@ -2,6 +2,9 @@
 using MenuEngine.src.elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ProceduralRPG.src.world.biomes;
+using System;
+using System.Collections.Generic;
 
 namespace ProceduralRPG.src.world.generation
 {
@@ -14,22 +17,32 @@ namespace ProceduralRPG.src.world.generation
             Texture2D texture = new(Engine.Instance.GraphicsDevice, world.Settings.width, world.Settings.height);
 
             Color[] colors = new Color[world.Settings.width * world.Settings.height];
-            for (int y = 0; y < world.Settings.height; y++)
+            foreach (TectonicPlate plate in world.TectonicPlates)
             {
-                for (int x = 0; x < world.Settings.width; x++)
+                Chunk[] chunks = plate.Chunks.ToArray();
+                foreach (Chunk chunk in chunks)
                 {
-                    Chunk chunk = world.Chunks[x, y];
-
                     int plateId = chunk.plate?.Id ?? 0;
 
                     Color[] plateColors = new Color[]
                     {
-                        Color.Gray, Color.Aquamarine, Color.Plum, Color.Salmon, Color.Pink, Color.RoyalBlue, Color.Beige, Color.BlueViolet, Color.Orange, Color.Orchid,
-                        Color.HotPink, Color.Honeydew, Color.Purple, Color.PeachPuff, Color.Olive, Color.MediumOrchid, Color.OliveDrab, Color.DeepPink
+                        Color.HotPink, Color.Aquamarine, Color.Plum, Color.Salmon, Color.Pink, Color.RoyalBlue, Color.Beige, Color.BlueViolet, Color.Orange, Color.Orchid,
+                        Color.Honeydew, Color.Purple, Color.PeachPuff, Color.Olive, Color.MediumOrchid, Color.OliveDrab, Color.DeepPink
                     };
                     Color color = plateColors[plateId % plateColors.Length];
 
-                    colors[x + y * world.Settings.width] = color;
+                    colors[(int)chunk.Pos.X + (int)chunk.Pos.Y * world.Settings.width] = color;
+                }
+
+                chunks = plate.Borders.ToArray();
+                foreach (Chunk chunk in chunks)
+                {
+                    if (chunk == null)
+                    {
+                        WorldGenerator.instance.menu.Log("Chunk is null!");
+                        continue;
+                    }
+                    colors[(int)chunk.Pos.X + (int)chunk.Pos.Y * world.Settings.width] = Color.Red;
                 }
             }
 
@@ -51,13 +64,19 @@ namespace ProceduralRPG.src.world.generation
 
                     int elevation = chunk.elevation;
                     Color color;
+                    WorldGenerationSettings.Elevation settings = world.Settings.elevation;
 
-                    if (elevation < world.Settings.defaultElevation)
-                        color = Color.Lerp(Color.DarkBlue, Color.Aqua, elevation / (float)world.Settings.defaultElevation);
-                    else if (elevation < 12500)
-                        color = Color.Lerp(Color.YellowGreen, Color.DarkGreen, (elevation - world.Settings.defaultElevation) / 2500f);
+                    // Make sure to keep at least 1 float in each division to prevent integer division
+                    if (elevation < settings.baseSeaLevel / 2)
+                        color = Color.Lerp(Color.Black, Color.DarkBlue, elevation / (settings.baseSeaLevel / 2f));
+                    else if (elevation < settings.baseSeaLevel)
+                        color = Color.Lerp(Color.DarkBlue, Color.Aqua, (elevation - (settings.baseSeaLevel / 2f)) / (settings.baseSeaLevel / 2));
+                    else if (elevation < settings.mountainLevel)
+                        color = Color.Lerp(Color.YellowGreen, Color.DarkGreen, (elevation - settings.baseSeaLevel) / (float)(settings.mountainLevel - settings.baseSeaLevel));
+                    else if (elevation < settings.peakLevel)
+                        color = Color.Lerp(Color.SlateGray, Color.LightGray, (elevation - settings.mountainLevel) / (float)(settings.peakLevel - settings.mountainLevel));
                     else
-                        color = Color.Lerp(Color.Gray, Color.White, (elevation - 12500) / 2500f); ;
+                        color = Color.Lerp(Color.White, Color.Lerp(Color.DarkSlateGray, Color.DarkSlateBlue, 0.6f), (elevation - settings.peakLevel) / 10000f);
 
                     colors[x + y * world.Settings.width] = color;
                 }
@@ -166,6 +185,55 @@ namespace ProceduralRPG.src.world.generation
                         color = Color.Lerp(Color.Blue, Color.White, (rainfall - 1000) / 500f);
 
                     colors[x + y * world.Settings.width] = color;
+                }
+            }
+
+            texture.SetData(colors);
+            map.Texture = texture;
+        }
+
+        internal static void DisplayBiomeMap(World world, TextureRendererElement map)
+        {
+            WorldGenerator.instance.menu.Log("Creating rainfall map...");
+
+            Texture2D texture = new(Engine.Instance.GraphicsDevice, world.Settings.width, world.Settings.height);
+
+            Color[] colors = new Color[world.Settings.width * world.Settings.height];
+            for (int y = 0; y < world.Settings.height; y++)
+            {
+                for (int x = 0; x < world.Settings.width; x++)
+                {
+                    try
+                    {
+                        Chunk chunk = world.Chunks[x, y];
+                        KeyValuePair<Biome, float>[] biomes = chunk.Biomes;
+
+                        Color[] colorArray = new Color[biomes.Length];
+
+                        for (int i = 0; i < biomes.Length; i++)
+                        {
+                            Biome biome = biomes[i].Key;
+                            float value = biomes[i].Value;
+
+                            colorArray[i] = biome.Color * value;
+                        }
+
+                        Color color = new();
+
+                        foreach (Color c in colorArray)
+                        {
+                            color.R += c.R;
+                            color.G += c.G;
+                            color.B += c.B;
+                            color.A += c.A;
+                        }
+
+                        colors[x + y * world.Settings.width] = color;
+                    }
+                    catch (Exception e)
+                    {
+                        WorldGenerator.instance.menu.Log(e.ToString());
+                    }
                 }
             }
 

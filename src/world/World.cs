@@ -32,8 +32,18 @@ namespace ProceduralRPG.src.world
 
                 if (y < 0 || y >= Settings.height)
                 {
-                    y += Settings.height / 2;
-                    y %= Settings.height;
+                    //x += Settings.height / 2;
+                    //if (x >= Settings.width)
+                    //    x %= Settings.width;
+                    //else if (x < 0)
+                    //    x = Settings.width - Math.Abs(x % Settings.width);
+
+                    //if (y >= Settings.height)
+                    //    y %= Settings.height;
+                    //else if (y < 0)
+                    //    y = Settings.height - Math.Abs(y % Settings.height);
+
+                    return null;
                 }
 
                 return Chunks[x, y];
