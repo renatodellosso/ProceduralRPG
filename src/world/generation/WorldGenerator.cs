@@ -105,7 +105,7 @@ namespace ProceduralRPG.src.world.generation
             {
                 for (int y = 0; y < settings.height; y++)
                 {
-                    world.Chunks[x, y].CalculateBiome();
+                    world.Chunks[x, y].CalculateBiomes();
                 }
             }
         }

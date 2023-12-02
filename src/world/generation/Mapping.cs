@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ProceduralRPG.src.world.biomes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ProceduralRPG.src.world.generation
 {
@@ -259,6 +260,14 @@ namespace ProceduralRPG.src.world.generation
                         KeyValuePair<Biome, float>[] biomes = chunk.Biomes;
 
                         Color[] colorArray = new Color[biomes.Length];
+
+                        if (biomes.Length == 0)
+                        {
+                            Debug.WriteLine($"No biomes at {chunk.Pos.X}, {chunk.Pos.Y}: \n\tTemp: {chunk.Temperature}, Rainfall: {chunk.Rainfall}, Elevation: {chunk.elevation}, " +
+                                $"Rockiness: {chunk.GetRockiness()}, Marshiness: {chunk.GetMarshiness()}, IsWater: {chunk.IsWater}, Plate.IsWater: {chunk.plate!.IsWater}");
+                            colors[x + y * world.Settings.width] = Color.Black;
+                            continue;
+                        }
 
                         for (int i = 0; i < biomes.Length; i++)
                         {

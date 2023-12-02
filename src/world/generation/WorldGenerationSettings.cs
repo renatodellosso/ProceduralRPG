@@ -12,6 +12,8 @@
             /// How many years the tectonic plates will move for before continuing with other steps
             /// </summary>
             internal required int initialDuration;
+            internal required int lowExtremeElevation, highExtremeElevation;
+            internal required float extremeElevationMult;
             internal required int collisionForceSmoothing, forceMult, chunkIntraplateForceSmoothing, intraplateForceElevationMult;
             internal required float collisionForceMult, platewideForceMult, minIntraplateForceMult, maxIntraplateForceMult;
         }
@@ -34,7 +36,7 @@
 
         internal WorldGenerationSettings()
         {
-            //Utils.SeedRand(1);
+            //Utils.SeedRand(0);
 
             width = 500;
             height = 300;
@@ -43,13 +45,22 @@
             {
                 minPlateCount = 15,
                 maxPlateCount = 20,
+
                 initialDuration = 1000,
+
+                lowExtremeElevation = 5000,
+                highExtremeElevation = 15000,
+                extremeElevationMult = 0.175f,
+
                 collisionForceSmoothing = 25,
                 forceMult = 100,
+
                 chunkIntraplateForceSmoothing = 250,
                 intraplateForceElevationMult = 250,
+
                 collisionForceMult = 0.045f,
                 platewideForceMult = 5f,
+
                 minIntraplateForceMult = 0.5f,
                 maxIntraplateForceMult = 3.0f
             };

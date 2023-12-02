@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,6 +25,32 @@ namespace ProceduralRPG.src.world.generation
                 ExpandPlates(world, new LinkedList<TectonicPlate>(plates));
 
                 ApplyForces(world, world.Settings.tectonics.initialDuration);
+
+                //using (TextureRendererElement map = new(WorldGenerator.instance.menu, new(0.3f, 0f), new(0.5f * 1080 / 1920, 0.5f)))
+                //{
+                //    BetterTask mapTask = new((t) =>
+                //    {
+                //        try
+                //        {
+                //            while (!t.IsCanceled)
+                //                Mapping.DisplayElevationMap(world, map);
+                //        }
+                //        catch (System.Exception e)
+                //        {
+                //            WorldGenerator.instance.menu.Log("Error displaying elevation map: " + e.Message);
+                //            WorldGenerator.instance.menu.Log(e.StackTrace ?? "StackTrace is null!");
+                //        }
+                //    });
+                //    mapTask.Start();
+
+                //    int divisor = 100;
+                //    for (int i = 0; i < world.Settings.tectonics.initialDuration / divisor; i++)
+                //    {
+                //        ApplyForces(world, divisor);
+                //    }
+
+                //    mapTask.Cancel();
+                //}
 
                 ApplyIntraplateForces(world);
 
@@ -277,7 +304,20 @@ namespace ProceduralRPG.src.world.generation
                     Vector2 force = forces[x, y];
                     Chunk chunk = world.Chunks[x, y];
                     int elevationChange = (int)((force.X + force.Y) * world.Settings.tectonics.forceMult * years);
-                    chunk.elevation += elevationChange;
+
+                    if (elevationChange == 0) continue;
+
+                    int newElevation = chunk.elevation + elevationChange;
+                    if (newElevation < world.Settings.tectonics.lowExtremeElevation || newElevation > world.Settings.tectonics.highExtremeElevation)
+                    {
+                        int unscaledElevationChange;
+                        if (newElevation < world.Settings.tectonics.lowExtremeElevation) unscaledElevationChange = world.Settings.tectonics.lowExtremeElevation - chunk.elevation;
+                        else unscaledElevationChange = world.Settings.tectonics.highExtremeElevation - chunk.elevation;
+
+                        elevationChange = (int)((elevationChange - unscaledElevationChange) * world.Settings.tectonics.extremeElevationMult) + unscaledElevationChange;
+                    }
+
+                    chunk.elevation = Math.Max(chunk.elevation + elevationChange, 0);
                 }
             }
 

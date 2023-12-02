@@ -134,7 +134,7 @@ namespace ProceduralRPG.src.world
             return rockiness / adjacent.Length;
         }
 
-        internal void CalculateBiome()
+        internal void CalculateBiomes()
         {
             try
             {
@@ -154,6 +154,10 @@ namespace ProceduralRPG.src.world
                 for (int i = 0; i < biomeScores.Count && i < World.Settings.maxBiomesPerChunk; i++)
                 {
                     KeyValuePair<BiomeId, float> biomeScore = biomeScores[i];
+
+                    if (biomeScore.Value <= 0)
+                        break;
+
                     biomeIds.Add(new(biomeScore.Key, biomeScore.Value));
                     totalWeight += biomeScore.Value;
                 }
