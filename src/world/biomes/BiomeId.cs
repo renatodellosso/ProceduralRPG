@@ -2,8 +2,18 @@
 {
     internal enum BiomeId
     {
-        Ocean,
+        DeepOcean,
+        ShallowOcean,
+        FreshWater,
+        SeaIce,
         Grassland,
-        Forest
+        Hills,
+        Forest,
+        Taiga,
+        Desert,
+        ExtremeDesert,
+        Tundra,
+        IceSheet,
+        FrigidWasteland
     }
 }

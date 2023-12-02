@@ -8,6 +8,8 @@ namespace ProceduralRPG.src.world
     internal class World
     {
 
+        internal static World Instance { get; private set; }
+
         internal WorldGenerationSettings Settings { get; private set; }
 
         internal Chunk[,] Chunks { get; private set; }
@@ -15,6 +17,8 @@ namespace ProceduralRPG.src.world
 
         internal World(WorldGenerationSettings settings)
         {
+            Instance = this;
+
             Settings = settings;
 
             Chunks = new Chunk[settings.width, settings.height];

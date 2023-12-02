@@ -1,8 +1,5 @@
-﻿using BetterTasks;
-using MenuEngine.src.elements;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace ProceduralRPG.src.world.generation
@@ -24,8 +21,7 @@ namespace ProceduralRPG.src.world.generation
                     world.TectonicPlates.Add(new(world));
                 }
 
-                LinkedList<TectonicPlate> expandingPlates = new(plates);
-                ExpandPlates(world, expandingPlates);
+                ExpandPlates(world, new LinkedList<TectonicPlate>(plates));
 
                 ApplyForces(world, world.Settings.tectonics.initialDuration);
 
@@ -47,23 +43,23 @@ namespace ProceduralRPG.src.world.generation
             // For every plate, add a random adjacent chunk to it, until there are no more chunks to add
             WorldGenerator.instance.menu.Log("Expanding tectonic plates...");
 
-            Vector2 mapPos = new(0.3f, 0f), mapSize = new(0.5f * 1080 / 1920, 0.5f);
-            TextureRendererElement map = new(WorldGenerator.instance.menu, mapPos, mapSize);
+            //Vector2 mapPos = new(0.3f, 0f), mapSize = new(0.5f * 1080 / 1920, 0.5f);
+            //TextureRendererElement map = new(WorldGenerator.instance.menu, mapPos, mapSize);
 
-            BetterTask task = new((t) =>
-            {
-                try
-                {
-                    while (!t.IsCanceled)
-                        Mapping.DisplayPlateMap(world, map);
-                }
-                catch (System.Exception e)
-                {
-                    WorldGenerator.instance.menu.Log("Error displaying plate map: " + e.Message);
-                    WorldGenerator.instance.menu.Log(e.StackTrace ?? "StackTrace is null!");
-                }
-            });
-            task.Start();
+            //BetterTask task = new((t) =>
+            //{
+            //    try
+            //    {
+            //        while (!t.IsCanceled)
+            //            Mapping.DisplayPlateMap(world, map);
+            //    }
+            //    catch (System.Exception e)
+            //    {
+            //        WorldGenerator.instance.menu.Log("Error displaying plate map: " + e.Message);
+            //        WorldGenerator.instance.menu.Log(e.StackTrace ?? "StackTrace is null!");
+            //    }
+            //});
+            //task.Start();
 
             while (expandingPlates.Any())
             {
@@ -118,6 +114,14 @@ namespace ProceduralRPG.src.world.generation
                 plate.Borders.Remove(borderChunk);
                 plate.Borders.AddRange(borderChunk.GetAdjacent());
 
+                // Remove the border chunk from the borders of other plates
+                foreach (Chunk adjacent in borderChunk.GetAdjacent())
+                {
+                    if (adjacent.plate == null) continue;
+
+                    adjacent.plate.Borders.Remove(borderChunk);
+                }
+
                 // Remove all borders that are already part of a plate
                 for (int i = 0; i < plate.Borders.Count; i++)
                 {
@@ -133,8 +137,8 @@ namespace ProceduralRPG.src.world.generation
                 if (plate.Borders.Any()) expandingPlates.AddLast(plate);
             }
 
-            task.Cancel();
-            map.Dispose();
+            //task.Cancel();
+            //map.Dispose();
 
             // Check if every chunk is part of a plate
             for (int y = 0; y < world.Settings.height; y++)
@@ -143,7 +147,23 @@ namespace ProceduralRPG.src.world.generation
                 {
                     if (world.Chunks[x, y].plate == null)
                     {
-                        Debug.WriteLine($"Chunk at {x}, {y} is not part of a plate!");
+                        Chunk chunk = world.Chunks[x, y];
+
+                        // Add the chunk to the nearest plate
+                        for (int distance = 1; chunk.plate == null; distance++)
+                        {
+                            Chunk[] adjacent = chunk.GetAdjacent(distance);
+                            foreach (Chunk adj in adjacent)
+                            {
+                                if (adj.plate != null)
+                                {
+                                    chunk.plate = adj.plate;
+                                    chunk.plate.Chunks.Add(chunk);
+                                    chunk.plate.Borders.AddRange(chunk.GetAdjacent());
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }

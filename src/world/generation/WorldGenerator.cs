@@ -54,7 +54,7 @@ namespace ProceduralRPG.src.world.generation
                 CalculateBiomes();
 
                 Vector2 mapPos = new(0.3f, 0f), mapSize = new(0.5f * 1080 / 1920, 0.5f);
-                Mapping.DisplayPlateMap(world, new(menu, mapPos, mapSize));
+                Mapping.DisplayRainfallMap(world, new(menu, mapPos, mapSize));
                 Mapping.DisplayElevationMap(world, new(menu, new(mapPos.X + mapSize.X, mapPos.Y), mapSize));
                 Mapping.DisplayBiomeMap(world, new(menu, new(mapPos.X, mapPos.Y + mapSize.Y), mapSize));
                 Mapping.DisplayTemperatureMap(world, new(menu, new(mapPos.X + mapSize.X, mapPos.Y + mapSize.Y), mapSize));
