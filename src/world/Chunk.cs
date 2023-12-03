@@ -51,30 +51,16 @@ namespace ProceduralRPG.src.world
                 float rainfall = baseRainfallMult * World.Settings.baseRainfall;
 
                 rainfall *= 1.2f - (elevation - World.Settings.elevation.defaultElevation + 650) / 6500f * 0.7f;
-                rainfall *= 1.4f - Math.Abs(Temperature - 55) / 65f;
+                //rainfall *= 1.4f - Math.Abs(Temperature - 55) / 65f;
 
                 return Math.Max((int)rainfall, 0);
             }
         }
 
         /// <summary>
-        /// Key is biome id, value is what percent of the total biome score this biome is
+        /// A biome generated from the weighted average of the biomes in the chunk
         /// </summary>
-        private KeyValuePair<BiomeId, float>[]? biomeIds;
-        internal KeyValuePair<Biome, float>[] Biomes
-        {
-            get
-            {
-                KeyValuePair<Biome, float>[] biomes = new KeyValuePair<Biome, float>[biomeIds!.Length];
-
-                for (int i = 0; i < biomeIds!.Length; i++)
-                {
-                    biomes[i] = new KeyValuePair<Biome, float>(BiomeList.Get(biomeIds[i].Key), biomeIds[i].Value);
-                }
-
-                return biomes;
-            }
-        }
+        internal Biome? Biome { get; private set; }
 
         internal bool IsWater => elevation < World.Settings.elevation.baseSeaLevel;
         internal bool IsMountain => elevation > World.Settings.elevation.mountainLevel;
@@ -142,7 +128,7 @@ namespace ProceduralRPG.src.world
 
                 foreach (Biome biome in BiomeList.GetAllBiomes())
                 {
-                    biomeScores.Add(new(biome.Id, biome.GetScore(this)));
+                    biomeScores.Add(new(biome.Id!.Value, biome.GetScore!.Invoke(this)));
                 }
 
                 biomeScores = biomeScores.OrderByDescending(i => i.Value).ToList();
@@ -167,7 +153,21 @@ namespace ProceduralRPG.src.world
                     biomeIds[i] = new(biomeIds[i].Key, biomeIds[i].Value / totalWeight);
                 }
 
-                this.biomeIds = biomeIds.ToArray();
+                if (biomeIds.Count == 0)
+                {
+                    Debug.WriteLine($"No biomes at {Pos.X}, {Pos.Y}: \n\tTemp: {Temperature}, Rainfall: {Rainfall}, Elevation: {elevation}, " +
+                                $"Rockiness: {GetRockiness()}, Marshiness: {GetMarshiness()}, IsWater: {IsWater}, Plate.IsWater: {plate!.IsWater}");
+                    return;
+                }
+
+                // Generate biome
+                KeyValuePair<Biome, float>[] biomes = new KeyValuePair<Biome, float>[biomeIds.Count];
+                for (int i = 0; i < biomeIds.Count; i++)
+                {
+                    biomes[i] = new KeyValuePair<Biome, float>(BiomeList.Get(biomeIds[i].Key), biomeIds[i].Value);
+                }
+
+                Biome = new(biomes);
             }
             catch (Exception e)
             {

@@ -1,6 +1,6 @@
 ﻿namespace ProceduralRPG.src.world.generation
 {
-    internal class WorldGenerationSettings
+    internal struct WorldGenerationSettings
     {
 
         internal int width, height;
@@ -34,7 +34,7 @@
 
         internal int minInitialFactions, maxInitialFactions;
 
-        internal WorldGenerationSettings()
+        public WorldGenerationSettings()
         {
             //Utils.SeedRand(0);
 
@@ -73,7 +73,7 @@
                 peakLevel = 15000
             };
 
-            baseTemperature = 110;
+            baseTemperature = 115;
 
             rainfallSmoothing = 50;
             baseRainfall = 1250;

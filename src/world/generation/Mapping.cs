@@ -4,8 +4,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ProceduralRPG.src.world.biomes;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace ProceduralRPG.src.world.generation
 {
@@ -257,37 +255,15 @@ namespace ProceduralRPG.src.world.generation
                     try
                     {
                         Chunk chunk = world.Chunks[x, y];
-                        KeyValuePair<Biome, float>[] biomes = chunk.Biomes;
+                        Biome? biome = chunk.Biome;
 
-                        Color[] colorArray = new Color[biomes.Length];
-
-                        if (biomes.Length == 0)
+                        if (biome == null)
                         {
-                            Debug.WriteLine($"No biomes at {chunk.Pos.X}, {chunk.Pos.Y}: \n\tTemp: {chunk.Temperature}, Rainfall: {chunk.Rainfall}, Elevation: {chunk.elevation}, " +
-                                $"Rockiness: {chunk.GetRockiness()}, Marshiness: {chunk.GetMarshiness()}, IsWater: {chunk.IsWater}, Plate.IsWater: {chunk.plate!.IsWater}");
-                            colors[x + y * world.Settings.width] = Color.Black;
+                            colors[x + y * world.Settings.width] = Color.HotPink;
                             continue;
                         }
 
-                        for (int i = 0; i < biomes.Length; i++)
-                        {
-                            Biome biome = biomes[i].Key;
-                            float value = biomes[i].Value;
-
-                            colorArray[i] = biome.Color * value;
-                        }
-
-                        Color color = new();
-
-                        foreach (Color c in colorArray)
-                        {
-                            color.R += c.R;
-                            color.G += c.G;
-                            color.B += c.B;
-                            color.A += c.A;
-                        }
-
-                        colors[x + y * world.Settings.width] = color;
+                        colors[x + y * world.Settings.width] = biome.Color;
                     }
                     catch (Exception e)
                     {
