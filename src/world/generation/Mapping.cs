@@ -248,6 +248,7 @@ namespace ProceduralRPG.src.world.generation
             Texture2D texture = new(Engine.Instance.GraphicsDevice, world.Settings.width, world.Settings.height);
 
             Color[] colors = new Color[world.Settings.width * world.Settings.height];
+            bool logMissingBiomes = false;
             for (int y = 0; y < world.Settings.height; y++)
             {
                 for (int x = 0; x < world.Settings.width; x++)
@@ -259,6 +260,7 @@ namespace ProceduralRPG.src.world.generation
 
                         if (biome == null)
                         {
+                            logMissingBiomes = true;
                             colors[x + y * world.Settings.width] = Color.HotPink;
                             continue;
                         }
@@ -274,6 +276,9 @@ namespace ProceduralRPG.src.world.generation
 
             texture.SetData(colors);
             map.Texture = texture;
+
+            if (logMissingBiomes)
+                WorldGenerator.instance.menu.Log("<color=Red>Some chunks lacked biomes!</>");
         }
     }
 }

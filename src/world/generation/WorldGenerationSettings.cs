@@ -32,6 +32,13 @@
 
         internal int maxBiomesPerChunk;
 
+        internal int resourceSmoothing;
+        internal float resourceMult;
+        /// <summary>
+        /// Will ignore any resources with an amount less than this
+        /// </summary>
+        internal float minResourceAmt;
+
         internal int minInitialFactions, maxInitialFactions;
 
         public WorldGenerationSettings()
@@ -79,6 +86,10 @@
             baseRainfall = 1250;
 
             maxBiomesPerChunk = 3;
+
+            resourceSmoothing = 10;
+            resourceMult = 1f;
+            minResourceAmt = 0.1f;
 
             minInitialFactions = 1;
             maxInitialFactions = 3;

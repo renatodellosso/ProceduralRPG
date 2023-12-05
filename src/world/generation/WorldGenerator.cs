@@ -2,6 +2,8 @@
 using MenuEngine.src.elements;
 using Microsoft.Xna.Framework;
 using ProceduralRPG.src.elements.menus;
+using ProceduralRPG.src.world.resources;
+using System.Collections.Generic;
 
 namespace ProceduralRPG.src.world.generation
 {
@@ -62,6 +64,8 @@ namespace ProceduralRPG.src.world.generation
 
                     Mapping.DisplayBiomeMap(world, map);
 
+                    GenerateResources(world);
+
                     menu.Log("<color=Green>World generation complete!</>");
                     menu.titleElement.SetText("<color=Green>World generation complete!</>");
                 } while (false);
@@ -88,7 +92,7 @@ namespace ProceduralRPG.src.world.generation
                 }
             }
 
-            rainfall = Utils.Smooth(rainfall, world.Settings.rainfallSmoothing);
+            Utils.Smooth(rainfall, world.Settings.rainfallSmoothing);
 
             // Calculate rainfall for each chunk
             for (int x = 0; x < world.Settings.width; x++)
@@ -111,6 +115,51 @@ namespace ProceduralRPG.src.world.generation
                 {
                     world.Chunks[x, y].CalculateBiomes();
                 }
+            }
+        }
+
+        private void GenerateResources(World world)
+        {
+            ResourceId? currentResource = null;
+            try
+            {
+                menu.Log("Generating resources...");
+
+                List<KeyValuePair<Resource, float>>[,] resources = new List<KeyValuePair<Resource, float>>[world.Settings.width, world.Settings.height];
+
+                foreach (Resource resource in ResourceList.GetAllResources())
+                {
+                    currentResource = resource.Id;
+                    float[,] values = resource.Generate(world);
+
+                    for (int x = 0; x < world.Settings.width; x++)
+                    {
+                        for (int y = 0; y < world.Settings.height; y++)
+                        {
+                            if (resources[x, y] == null)
+                                resources[x, y] = new();
+
+                            float value = values[x, y];
+                            if (value >= world.Settings.minResourceAmt)
+                                resources[x, y].Add(new(resource, value));
+                        }
+                    }
+                }
+
+                for (int x = 0; x < world.Settings.width; x++)
+                {
+                    for (int y = 0; y < world.Settings.height; y++)
+                    {
+                        world.Chunks[x, y].Resources = resources[x, y].ToArray();
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                menu.Log("<color=Red>Resource generation failed.</>");
+                menu.Log($"Current Resource: {currentResource}");
+                menu.Log(e.Message);
+                menu.Log(e.StackTrace ?? "StackTrace is null!");
             }
         }
 

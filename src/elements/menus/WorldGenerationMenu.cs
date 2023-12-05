@@ -12,7 +12,7 @@ namespace ProceduralRPG.src.elements.menus
         internal TextElement titleElement;
 
         private List<string> log;
-        private const int LOG_LENGTH = 10;
+        private const int LOG_LENGTH = 25;
         private TextElement logElement;
 
         internal WorldGenerationMenu(WorldGenerationSettings settings)

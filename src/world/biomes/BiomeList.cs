@@ -70,7 +70,7 @@ namespace ProceduralRPG.src.world.biomes
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.GetRockiness(), 0, 250) * Score(chunk.Rainfall, 700, 250) * Score(chunk.Temperature, 70, 40, 90);
+                return Score(chunk.GetRockiness(), 0, 250) * Score(chunk.Rainfall, 700, 150, 850) * Score(chunk.Temperature, 70, 40, 90);
             }, 0.2f, 1),
             new(BiomeId.Hills, Color.DarkOliveGreen, (chunk) =>
             {
@@ -82,19 +82,19 @@ namespace ProceduralRPG.src.world.biomes
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.GetRockiness(), 100, 250) * Score(chunk.Rainfall, 500, 300) * Score(chunk.Temperature, 80, 70, 115);
+                return Score(chunk.GetRockiness(), 100, 250) * Score(chunk.Rainfall, 400, 750, 100) * Score(chunk.Temperature, 80, 50, 115);
             }, 0.1f, 0.6f),
             new(BiomeId.Mountains, Color.Lerp(Color.Gray, Color.DarkGreen, 0.8f), (chunk) =>
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.GetRockiness(), 350, 150, int.MaxValue) * Score(chunk.Rainfall, 500, 300) * Score(chunk.Temperature, 55, 25);
+                return Score(chunk.GetRockiness(), 350, 150, int.MaxValue) * Score(chunk.Temperature, 75, 25);
             }, 0.7f, 0.7f),
             new(BiomeId.AridMountains, Color.DarkOliveGreen, (chunk) =>
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.GetRockiness(), 350, 150, int.MaxValue) * Score(chunk.Rainfall, 500, 300) * Score(chunk.Temperature, 80, 70, 115);
+                return Score(chunk.GetRockiness(), 350, 150, int.MaxValue) * Score(chunk.Rainfall, 500, 400) * Score(chunk.Temperature, 80, 50, 115);
             }, 0.05f, 0.4f),
             new(BiomeId.Beach, Color.Lerp(Color.SandyBrown, Color.Yellow, 0.4f), (chunk) =>
             {
@@ -114,33 +114,41 @@ namespace ProceduralRPG.src.world.biomes
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.Rainfall, 800, 250) * Score(chunk.Temperature, 60, 45, 75);
+
+                // We use 10,000 so as to weight Rainforest more as rainfall increases
+                return Score(chunk.Rainfall, 800, 250, 10000) * Score(chunk.Temperature, 60, 40, 76);
             }, 1f, 1f),
             new(BiomeId.Taiga, Color.Lerp(Color.White, Color.DarkGreen, 0.5f), (chunk) =>
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.Rainfall, 800, 250) * Score(chunk.Temperature, 40, -10, 50);
+                return Score(chunk.Rainfall, 800, 250) * Score(chunk.Temperature, 45, -10, 50);
             }, 1f, 0.6f),
             new(BiomeId.Rainforest, Color.DarkOliveGreen, (chunk) =>
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.Rainfall, 1000, 250) * Score(chunk.Temperature, 80, 70, 115);
+                return Score(chunk.Rainfall, 1200, 850, int.MaxValue) * Score(chunk.Temperature, 85, 75, 115);
             }, 1.3f, 0.8f),
 
-            // Dry & hot land biomes
+            // Desert land biomes
             new(BiomeId.Desert, Color.SandyBrown, (chunk) =>
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.Rainfall, 450, 0, 750) * Score(chunk.Temperature, 90, 80, 130);
+                return Math.Max(Score(chunk.Rainfall, 450, -1, 600), Score(chunk.Temperature, 110, 90, 140)) * Score(chunk.Temperature, 90, 80, 130);
             }, 0f, 0f),
             new(BiomeId.ExtremeDesert, Color.Lerp(Color.Yellow, Color.SandyBrown, 0.4f), (chunk) =>
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.Rainfall, 100, 0, 700) * Score(chunk.Temperature, 110, 95, 150);
+                return Score(chunk.Rainfall, 100, int.MinValue, 600) * Score(chunk.Temperature, 110, 95, int.MaxValue);
+            }, 0f, 0f),
+            new(BiomeId.ColdDesert, Color.Lerp(Color.SandyBrown, Color.White, 0.5f), (chunk) =>
+            {
+                if (chunk.IsWater)
+                    return 0;
+                return Score(chunk.Rainfall, 450, -1, 600) * Score(chunk.Temperature, 40, -10, 55);
             }, 0f, 0f),
 
             // Cold land biomes
@@ -148,7 +156,7 @@ namespace ProceduralRPG.src.world.biomes
             {
                 if (chunk.IsWater)
                     return 0;
-                return Score(chunk.Rainfall, 400, 0, 800) * Score(chunk.Temperature, 30, -35, 45);
+                return Score(chunk.Rainfall, 400, -1, int.MaxValue) * Score(chunk.Temperature, 30, -35, 45);
             }, 0.1f, 0.1f),
             new(BiomeId.IceSheet, Color.LightGray, (chunk) =>
             {
@@ -156,7 +164,7 @@ namespace ProceduralRPG.src.world.biomes
                     return 0;
 
                 // The min for rainfall is -200, so 0-rainfall chunks get weight
-                return Score(chunk.Rainfall, 400, -200, 800) * Score(chunk.Temperature, -60, -100, 5);
+                return Score(chunk.Rainfall, 400, -200, int.MaxValue) * Score(chunk.Temperature, -60, -100, 5);
             }, 0f, 0f),
             new(BiomeId.FrigidWasteland, Color.Gray, (chunk) =>
             {
@@ -164,12 +172,14 @@ namespace ProceduralRPG.src.world.biomes
             }, 0f, 0f)
         };
 
-        private readonly Dictionary<BiomeId, Biome> biomeDict = new();
+        private readonly Dictionary<BiomeId, Biome> biomeDict;
 
         private readonly static BiomeList instance = new();
 
         private BiomeList()
         {
+            biomeDict = new();
+
             foreach (Biome biome in biomes)
                 biomeDict.Add(biome.Id!.Value, biome);
         }

@@ -19,6 +19,7 @@
         Rainforest,
         Desert,
         ExtremeDesert,
+        ColdDesert,
         Tundra,
         IceSheet,
         FrigidWasteland

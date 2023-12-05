@@ -30,7 +30,7 @@ namespace ProceduralRPG.src
         /// <summary>
         /// Averages the values of the surrounding cells
         /// </summary>
-        internal static float[,] Smooth(float[,] map, int times)
+        internal static void Smooth(float[,] map, int times)
         {
             for (int i = 0; i < times; i++)
             {
@@ -62,8 +62,20 @@ namespace ProceduralRPG.src
 
                 map = newMap;
             }
+        }
 
-            return map;
+        /// <summary>
+        /// Adds a random float between 0 and max to each value in the array
+        /// </summary>
+        internal static void AddRandomNoise(float[,] map, float max = 1)
+        {
+            for (int x = 0; x < map.GetLength(0); x++)
+            {
+                for (int y = 0; y < map.GetLength(1); y++)
+                {
+                    map[x, y] += RandFloat(max);
+                }
+            }
         }
     }
 }
