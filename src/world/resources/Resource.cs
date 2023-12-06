@@ -9,7 +9,8 @@ namespace ProceduralRPG.src.world.resources
 
         internal string Name { get; private set; }
 
-        internal Func<World, float[,]> Generate { get; private set; }
+        internal Func<World, float[,]> GenerateAmount { get; private set; }
+        internal Func<World, float[,]> GenerateQuality { get; private set; }
 
         // Stats
 
@@ -18,24 +19,20 @@ namespace ProceduralRPG.src.world.resources
         /// </summary>
         internal float Nutrition { get; private set; }
         /// <summary>
-        /// Determines how easily this resource can be shaped
-        /// </summary>
-        internal float Malleability { get; private set; }
-        /// <summary>
-        /// Determines how easily this resource can be broken
+        /// Determines how easily this resource can be broken, on the Mohs scale
         /// </summary>
         internal float Hardness { get; private set; }
 
-
-        internal Resource(ResourceId id, string name, Func<World, float[,]> generate, float nutrition = 0, float malleability = 0, float hardness = 0)
+        internal Resource(ResourceId id, string name, Func<World, float[,]> generateAmt, Func<World, float[,]>? generateQuality = null, float nutrition = 0, float hardness = 0)
         {
             Id = id;
             Name = name;
-            Generate = generate;
+
+            GenerateAmount = generateAmt;
+            GenerateQuality = generateQuality ?? GenerateConstant;
 
             // Stats
             Nutrition = nutrition;
-            Malleability = malleability;
             Hardness = hardness;
         }
 
@@ -57,6 +54,30 @@ namespace ProceduralRPG.src.world.resources
             return values;
         }
 
-        internal static float[,] GenerateMineral(World world, float multiplier = 1) => GenerateBasedOnStat(world, (chunk) => chunk.GetRockiness(), 0.2f, multiplier);
+        /// <summary>
+        /// Generates based on the rockiness of the chunk
+        /// </summary>
+        internal static float[,] GenerateMineral(World world, float multiplier) => GenerateBasedOnStat(world, (chunk) => chunk.GetRockiness(), 0.2f, multiplier);
+        /// <summary>
+        /// Generates based on the rockiness of the chunk
+        /// </summary>
+        internal static float[,] GenerateMineral(World world) => GenerateMineral(world, 1);
+
+        internal static float[,] GenerateConstant(World world, float value)
+        {
+            float[,] values = new float[world.Settings.width, world.Settings.width];
+
+            for (int x = 0; x < world.Settings.width; x++)
+            {
+                for (int y = 0; y < world.Settings.height; y++)
+                {
+                    values[x, y] = value;
+                }
+            }
+
+            return values;
+        }
+
+        internal static float[,] GenerateConstant(World world) => GenerateConstant(world, 1);
     }
 }

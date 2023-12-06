@@ -125,12 +125,12 @@ namespace ProceduralRPG.src.world.generation
             {
                 menu.Log("Generating resources...");
 
-                List<KeyValuePair<Resource, float>>[,] resources = new List<KeyValuePair<Resource, float>>[world.Settings.width, world.Settings.height];
+                List<ResourceHolder>[,] resources = new List<ResourceHolder>[world.Settings.width, world.Settings.height];
 
                 foreach (Resource resource in ResourceList.GetAllResources())
                 {
                     currentResource = resource.Id;
-                    float[,] values = resource.Generate(world);
+                    float[,] values = resource.GenerateAmount(world);
 
                     for (int x = 0; x < world.Settings.width; x++)
                     {

@@ -66,26 +66,7 @@ namespace ProceduralRPG.src.world
         /// <summary>
         /// Key is the resource id, value is the amount of that resource in the chunk
         /// </summary>
-        private KeyValuePair<ResourceId, float>[] resources;
-        /// <summary>
-        /// Key is the resource, value is the amount of that resource in the chunk
-        /// </summary>
-        internal KeyValuePair<Resource, float>[] Resources
-        {
-            get
-            {
-                KeyValuePair<Resource, float>[] resources = new KeyValuePair<Resource, float>[this.resources.Length];
-
-                for (int i = 0; i < resources.Length; i++)
-                    resources[i] = new KeyValuePair<Resource, float>(ResourceList.Get(this.resources[i].Key), this.resources[i].Value);
-
-                return resources;
-            }
-            set
-            {
-                resources = value.Select(r => new KeyValuePair<ResourceId, float>(r.Key.Id!.Value, r.Value)).ToArray();
-            }
-        }
+        internal ResourceHolder[] Resources { get; private set; }
 
         internal bool IsWater => elevation < World.Settings.elevation.baseSeaLevel;
         internal bool IsMountain => elevation > World.Settings.elevation.mountainLevel;
