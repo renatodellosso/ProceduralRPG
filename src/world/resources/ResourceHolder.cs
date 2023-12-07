@@ -10,6 +10,9 @@
 
         internal Resource Resource => ResourceList.Get(Id);
 
+        internal float Nutrition => Resource.Nutrition[Quality];
+        internal float Hardness => Resource.Hardness[Quality];
+
         internal ResourceHolder(ResourceId id, float amount, float quality)
         {
             Id = id;

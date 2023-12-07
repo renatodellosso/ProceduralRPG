@@ -66,7 +66,7 @@ namespace ProceduralRPG.src.world
         /// <summary>
         /// Key is the resource id, value is the amount of that resource in the chunk
         /// </summary>
-        internal ResourceHolder[] Resources { get; private set; }
+        internal ResourceHolder[] Resources { get; set; }
 
         internal bool IsWater => elevation < World.Settings.elevation.baseSeaLevel;
         internal bool IsMountain => elevation > World.Settings.elevation.mountainLevel;

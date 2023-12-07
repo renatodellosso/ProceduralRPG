@@ -5,6 +5,28 @@ namespace ProceduralRPG.src.world.resources
     internal class Resource
     {
 
+        internal struct Stat
+        {
+            internal float Min { get; private set; }
+            internal float Max { get; private set; }
+
+            internal float Avg => (Min + Max) / 2;
+
+            internal Stat(float min, float max)
+            {
+                Min = min;
+                Max = max;
+            }
+
+            /// <summary>
+            /// Lerps between <see cref="Min"/> and <see cref="Max"/> based on quality
+            /// </summary>
+            internal float this[float quality]
+            {
+                get => Utils.Lerp(Min, Max, quality);
+            }
+        }
+
         internal ResourceId? Id { get; private set; }
 
         internal string Name { get; private set; }
@@ -17,13 +39,13 @@ namespace ProceduralRPG.src.world.resources
         /// <summary>
         /// Determines whether this resource is edible or not
         /// </summary>
-        internal float Nutrition { get; private set; }
+        internal Stat Nutrition { get; private set; }
         /// <summary>
-        /// Determines how easily this resource can be broken, on the Mohs scale
+        /// Determines how easily this resource can be broken, in Mohs
         /// </summary>
-        internal float Hardness { get; private set; }
+        internal Stat Hardness { get; private set; }
 
-        internal Resource(ResourceId id, string name, Func<World, float[,]> generateAmt, Func<World, float[,]>? generateQuality = null, float nutrition = 0, float hardness = 0)
+        internal Resource(ResourceId id, string name, Func<World, float[,]> generateAmt, Func<World, float[,]>? generateQuality = null, Stat? nutrition = null, Stat? hardness = null)
         {
             Id = id;
             Name = name;
@@ -32,8 +54,8 @@ namespace ProceduralRPG.src.world.resources
             GenerateQuality = generateQuality ?? GenerateConstant;
 
             // Stats
-            Nutrition = nutrition;
-            Hardness = hardness;
+            Nutrition = nutrition ?? new(0, 0);
+            Hardness = hardness ?? new(0, 0);
         }
 
         internal static float[,] GenerateBasedOnStat(World world, Func<Chunk, float> getStat, float maxNoise = 0, float multiplier = 1)

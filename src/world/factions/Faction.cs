@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-
-namespace ProceduralRPG.src.world
+﻿namespace ProceduralRPG.src.world.factions
 {
     internal class Faction
     {

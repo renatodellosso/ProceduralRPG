@@ -77,5 +77,10 @@ namespace ProceduralRPG.src
                 }
             }
         }
+
+        internal static float Lerp(float min, float max, float t)
+        {
+            return min + (max - min) * t;
+        }
     }
 }

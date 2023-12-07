@@ -131,6 +131,7 @@ namespace ProceduralRPG.src.world.generation
                 {
                     currentResource = resource.Id;
                     float[,] values = resource.GenerateAmount(world);
+                    float[,] qualities = resource.GenerateQuality(world);
 
                     for (int x = 0; x < world.Settings.width; x++)
                     {
@@ -140,8 +141,9 @@ namespace ProceduralRPG.src.world.generation
                                 resources[x, y] = new();
 
                             float value = values[x, y];
-                            if (value >= world.Settings.minResourceAmt)
-                                resources[x, y].Add(new(resource, value));
+                            float quality = qualities[x, y];
+                            if (value >= world.Settings.minResourceAmtAndQuality && quality > world.Settings.minResourceAmtAndQuality)
+                                resources[x, y].Add(new(resource.Id!.Value, value, quality));
                         }
                     }
                 }

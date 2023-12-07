@@ -35,9 +35,9 @@
         internal int resourceSmoothing;
         internal float resourceMult;
         /// <summary>
-        /// Will ignore any resources with an amount less than this
+        /// Will ignore any resources with an amount or quality less than this
         /// </summary>
-        internal float minResourceAmt;
+        internal float minResourceAmtAndQuality;
 
         internal int minInitialFactions, maxInitialFactions;
 
@@ -89,7 +89,7 @@
 
             resourceSmoothing = 10;
             resourceMult = 1f;
-            minResourceAmt = 0.1f;
+            minResourceAmtAndQuality = 0.1f;
 
             minInitialFactions = 1;
             maxInitialFactions = 3;
